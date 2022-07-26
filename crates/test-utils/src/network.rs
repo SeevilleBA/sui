@@ -6,7 +6,6 @@ use jsonrpsee_http_server::{HttpServerBuilder, HttpServerHandle, RpcModule};
 use std::net::SocketAddr;
 use std::num::NonZeroUsize;
 use std::path::Path;
-use std::sync::Arc;
 use sui::{
     client_commands::{SuiClientCommands, WalletContext},
     config::SuiClientConfig,
@@ -15,9 +14,7 @@ use sui_config::gateway::GatewayConfig;
 use sui_config::genesis_config::GenesisConfig;
 use sui_config::{Config, SUI_CLIENT_CONFIG, SUI_GATEWAY_CONFIG, SUI_NETWORK_CONFIG};
 use sui_config::{PersistedConfig, SUI_KEYSTORE_FILENAME};
-use sui_core::gateway_state::GatewayClient;
 use sui_core::gateway_state::GatewayState;
-use sui_gateway::rpc_gateway_client::RpcGatewayClient;
 use sui_json_rpc::api::RpcGatewayApiServer;
 use sui_json_rpc::api::RpcReadApiServer;
 use sui_json_rpc::api::RpcTransactionBuilderServer;
@@ -26,7 +23,7 @@ use sui_json_rpc::gateway_api::{
     GatewayReadApiImpl, GatewayWalletSyncApiImpl, RpcGatewayImpl, TransactionBuilderImpl,
 };
 use sui_sdk::crypto::{KeystoreType, SuiKeystore};
-use sui_sdk::ClientType;
+use sui_sdk::{ClientType, SuiClient};
 use sui_swarm::memory::{Swarm, SwarmBuilder};
 use sui_types::base_types::SuiAddress;
 use sui_types::crypto::KeypairTraits;
@@ -161,13 +158,13 @@ pub async fn start_rpc_test_network_with_fullnode(
         .save()?;
 
     let http_client = HttpClientBuilder::default().build(rpc_url.clone())?;
-    let gateway_client = RpcGatewayClient::new(rpc_url.clone())?;
+    let gateway_client = SuiClient::new_http_client(&rpc_url)?;
     Ok(TestNetwork {
         network,
         _rpc_server: rpc_server_handle,
         accounts,
         http_client,
-        gateway_client: Arc::new(gateway_client),
+        gateway_client,
         rpc_url,
     })
 }
@@ -177,6 +174,6 @@ pub struct TestNetwork {
     _rpc_server: HttpServerHandle,
     pub accounts: Vec<SuiAddress>,
     pub http_client: HttpClient,
-    pub gateway_client: GatewayClient,
+    pub gateway_client: SuiClient,
     pub rpc_url: String,
 }
