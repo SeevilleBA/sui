@@ -127,6 +127,7 @@ impl SignatureSeed {
     /// ```
     /// use serde::{Deserialize, Serialize};
     /// use sui_types::signature_seed::SignatureSeed;
+    /// use sui_types::crypto::AccountKeyPair;
     ///
     /// # fn main() {
     ///     // In production this SHOULD be a secret seed value, here we pin it for demo purposes.
@@ -140,7 +141,7 @@ impl SignatureSeed {
     ///
     ///     // Get address for the provided `id`.
     ///     let sui_address = seed
-    ///         .new_deterministic_address(&id, Some(&domain))
+    ///         .new_deterministic_address::<AccountKeyPair>(&id, Some(&domain))
     ///         .unwrap();
     /// # }
     /// ```
@@ -172,6 +173,7 @@ impl SignatureSeed {
     /// ```
     /// use serde::{Deserialize, Serialize};
     /// use sui_types::signature_seed::SignatureSeed;
+    /// use sui_types::crypto::{SuiSignature, AccountKeyPair};
     /// use sui_types::crypto::bcs_signable_test::Foo;
     ///
     /// // The BcsSignable trait is implemented as a sealed trait, so this is equivalent to the
@@ -193,11 +195,11 @@ impl SignatureSeed {
     ///     // The msg to sign (note that we can only sign `Signable` objects.
     ///     let msg = Foo("some-signable-message".to_string());
     ///
-    ///     let signature = seed.sign(&id, Some(&domain), &msg).unwrap();
+    ///     let signature = seed.sign::<_, AccountKeyPair>(&id, Some(&domain), &msg).unwrap();
     ///
     ///     // Get address for the provided `id`.
     ///     let sui_address = seed
-    ///         .new_deterministic_address(&id, Some(&domain))
+    ///         .new_deterministic_address::<AccountKeyPair>(&id, Some(&domain))
     ///         .unwrap();
     ///     let verification = signature.verify(&msg, sui_address);
     ///     assert!(verification.is_ok());
@@ -223,7 +225,7 @@ impl SignatureSeed {
     where
         T: Signable<Vec<u8>>,
     {
-        let keypair = SignatureSeed::new_deterministic_keypair::<K>(self, id, domain)
+        let keypair: K = SignatureSeed::new_deterministic_keypair(self, id, domain)
             .map_err(|_| signature::Error::new())?;
         Ok(Signature::new(value, &keypair))
     }
