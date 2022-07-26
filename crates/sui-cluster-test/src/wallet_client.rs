@@ -30,7 +30,6 @@ impl WalletClient {
         let keystore_path = temp_dir.path().join(SUI_KEYSTORE_FILENAME);
         let keystore = KeystoreType::File(keystore_path);
         let key_pair = cluster.user_key();
-        println!("keypair");
         let address: SuiAddress = key_pair.public().into();
         keystore.init().unwrap().add_key(key_pair).unwrap();
         SuiClientConfig {
