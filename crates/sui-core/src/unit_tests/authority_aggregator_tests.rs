@@ -1011,7 +1011,7 @@ async fn test_quorum_once_with_timeout() {
     let mut authorities = BTreeMap::new();
     let mut clients = BTreeMap::new();
     for _ in 0..30 {
-        let (_, sec) = get_key_pair();
+        let (_, sec): (_, AuthorityKeyPair) = get_key_pair();
         let name: AuthorityName = sec.public().into();
         authorities.insert(name, 1);
         clients.insert(name, new_client(1000));

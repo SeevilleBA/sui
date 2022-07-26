@@ -27,7 +27,7 @@ pub enum KeystoreType {
 pub trait Keystore: Send + Sync {
     fn sign(&self, address: &SuiAddress, msg: &[u8]) -> Result<Signature, signature::Error>;
     fn add_random_key(&mut self) -> Result<SuiAddress, anyhow::Error>;
-    fn add_key(&mut self, keypair: KeyPair) -> Result<(), anyhow::Error>;
+    fn add_key(&mut self, keypair: AccountKeyPair) -> Result<(), anyhow::Error>;
 }
 
 impl KeystoreType {
@@ -74,7 +74,7 @@ impl Keystore for SuiKeystore {
         Ok(address)
     }
 
-    fn add_key(&mut self, keypair: KeyPair) -> Result<(), anyhow::Error> {
+    fn add_key(&mut self, keypair: AccountKeyPair) -> Result<(), anyhow::Error> {
         let address: SuiAddress = keypair.public().into();
         self.keys.insert(address, keypair);
         self.save()?;
